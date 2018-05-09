@@ -14,9 +14,14 @@ if (isset($_POST['createaccount'])){
                 if (strlen($password) >= 6 && strlen($password) <= 60 ){
                     //checking if email is valid
                     if (filter_var($email, FILTER_VALIDATE_EMAIL)){
-                        //Inserting the user inputs data into the database
-                        DB::query('INSERT INTO users VALUES (\'\',:username,:password,:email)', array(':username'=>$username, ':password'=>password_hash($password,PASSWORD_BCRYPT), ':email'=>$email));
-                        echo "Success!";
+                        //checking if the email is already used in the database
+                        if (!DB::query('SELECT email FROM users WHERE email=:email', array(':email'=>$email))){
+                            //Inserting the user inputs data into the database
+                            DB::query('INSERT INTO users VALUES (\'\',:username,:password,:email)', array(':username'=>$username, ':password'=>password_hash($password,PASSWORD_BCRYPT), ':email'=>$email));
+                            echo "Success!";
+                        } else {
+                            echo "Email is already in use!";
+                        }
                     } else {
                         echo "Your email is invalid!";
                     }
