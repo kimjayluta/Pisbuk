@@ -1,5 +1,5 @@
 <?php
-    include ('classes/db.php');
+   include ('classes/db.php');
     if (isset($_POST['login'])){
         $username = $_POST['username'];
         $password = $_POST['password'];
@@ -13,6 +13,7 @@
                 $user_id = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$username))[0]['id'];
                 DB::query('INSERT INTO login_tokens VALUES (\'\',:token, :user_id)', array(':token'=>sha1($token),':user_id'=>$user_id));
 
+                setcookie("SNID", $token, time() + 60 * 60 * 24 * 7, '/', NULl, NULL, TRUE);
             }else {
                 echo "Username or password is incorrect!";
             }
@@ -20,6 +21,7 @@
             echo 'User not registered!';
         }
     }
+
 ?>
 <h1>Login here!</h1>
 <form action="login.php" method="post">
