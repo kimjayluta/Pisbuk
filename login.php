@@ -24,7 +24,6 @@
             echo 'User not registered!';
         }
     }
-
 ?>
 <h1>Login here!</h1>
 <form action="login.php" method="post">
