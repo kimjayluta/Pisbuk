@@ -5,7 +5,9 @@ include('./classes/log_in.php');
 $username = "";
 $verified = false;
 $isFollowing = false;
-
+$userid = "";
+//id kang nka login
+$followerid = login::isLoggedIn();
 
 if (isset($_GET['username'])){
     //checking if the username(username ng ifafollow) is in the database
