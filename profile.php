@@ -72,28 +72,39 @@ if (isset($_GET['username'])) {
         }
 
     }
-    //Likeng function
+    //Like function
     if (isset($_GET['postid'])){
         //checking if the logged in user already liked the post
-        if (!DB::query('SELECT user_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'],':userid'=>$userid))){
+        if (!DB::query('SELECT user_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'],':userid'=>$followerid))){
             //like will insert in the database
             DB::query('UPDATE posts SET likes=likes+1 WHERE id=:postid', array(':postid'=>$_GET['postid']));
             //insert the user who liked the post
-            DB::query('INSERT INTO post_likes VALUES(\'\',:postid,:userid)',array(':postid'=>$_GET['postid'],':userid'=>$userid));
+            DB::query('INSERT INTO post_likes VALUES(\'\',:postid,:userid)',array(':postid'=>$_GET['postid'],':userid'=>$followerid));
         } else {
-            echo "Already liked!";
-            exit();
+            DB::query('UPDATE posts SET likes=likes-1 WHERE id=:postid', array(':postid'=>$_GET['postid']));
+            DB::query('DELETE FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'],'userid'=>$followerid));
         }
 
     }
-    //querying the posts and sets to a variable
+    //querying the posts
     $dbposts = DB::query('SELECT * FROM posts WHERE user_id=:userid ORDER BY id DESC', array(':userid' => $userid));
     $posts = "";
+    //to print the post
     foreach ($dbposts as $p) {
-        $posts .= htmlspecialchars($p['body'])."
+        //
+        if (!DB::query('SELECT post_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$p['id'],':userid'=>$followerid))){
+            $posts .= htmlspecialchars($p['body'])."
                     <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
                         <input type='submit' name='like' value='Like'>
+                        <span>".$p['likes']."likes</span>
                     </form><br/> <hr/>";
+        } else {
+            $posts .= htmlspecialchars($p['body'])."
+                    <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
+                        <input type='submit' name='unlike' value='Unlike'>
+                        <span>".$p['likes']." likes</span>
+                    </form><br/> <hr/>";
+        }
     }
 
 } else {
