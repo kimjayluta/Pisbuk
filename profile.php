@@ -8,18 +8,19 @@ $isFollowing = false;
 $userid = "";
 $followerid = "";
 
-
 if (isset($_GET['username'])) {
     //checking if the username(username ng ifafollow) is in the database
     if (DB::query('SELECT username FROM users WHERE username=:username', array(':username' => $_GET['username']))) {
-
+        //Username ng nsa get method
         $username = DB::query('SELECT username FROM users WHERE username=:username', array(':username' => $_GET['username']))[0]['username'];
+        //kinukua ang valye kang verified 0 means not verified and 1 means verified account
         $verified = DB::query('SELECT verified FROM users WHERE  username=:username', array(':username' => $_GET['username']))[0]['verified'];
-        //id kang ifafollow
+        //kinukua ang id kang nsa link na username
         $userid = DB::query('SELECT id FROM users WHERE username=:username', array(':username' => $_GET['username']))[0]['id'];
         //id kang nka login
         $followerid = login::isLoggedIn();
 
+        //follow function
         if (isset($_POST['follow'])) {
             if ($userid != $followerid) {
                 //kapag dae pa finafollow
@@ -35,7 +36,9 @@ if (isset($_GET['username'])) {
                 $isFollowing = true;
             }
         }
+
     }
+    //Unfollow function
     if (isset($_POST['unfollow'])) {
         if ($userid != $followerid) {
             if (DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid' => $userid, ':followerid' => $followerid))) {
@@ -47,25 +50,52 @@ if (isset($_GET['username'])) {
             $isFollowing = false;
         }
     }
+
     //kapg finafollow na kang user
     if (DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid' => $followerid))) {
         $isFollowing = true;
     }
 
+    //Post function
     if (isset($_POST['post'])) {
         $postbody = $_POST['postbody'];
-        $userid = login::isLoggedIn();
+        $loggedInUserId = login::isLoggedIn();
         //checking the length of the post
         if (strlen($postbody) < 1 || strlen($postbody) > 160) {
             die('Your post is too long');
         }
-        DB::query('INSERT INTO posts VALUES(\'\',:postbody, now(), :userid,0)', array(':postbody' => $postbody, ':userid' => $userid));
+        //Pwedi ka lang mag post sa sadiri mong account
+        if ($userid == $loggedInUserId){
+            DB::query('INSERT INTO posts VALUES(\'\',:postbody, now(), :userid,0)', array(':postbody' => $postbody, ':userid' => $userid));
+        } else {
+            die('Incorrect user');
+        }
+
     }
+    //Likeng function
+    if (isset($_GET['postid'])){
+        //checking if the logged in user already liked the post
+        if (!DB::query('SELECT user_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'],':userid'=>$userid))){
+            //like will insert in the database
+            DB::query('UPDATE posts SET likes=likes+1 WHERE id=:postid', array(':postid'=>$_GET['postid']));
+            //insert the user who liked the post
+            DB::query('INSERT INTO post_likes VALUES(\'\',:postid,:userid)',array(':postid'=>$_GET['postid'],':userid'=>$userid));
+        } else {
+            echo "Already liked!";
+            exit();
+        }
+
+    }
+    //querying the posts and sets to a variable
     $dbposts = DB::query('SELECT * FROM posts WHERE user_id=:userid ORDER BY id DESC', array(':userid' => $userid));
     $posts = "";
     foreach ($dbposts as $p) {
-        $posts .= $p['body'] . "<br/>" . "<hr/>";
+        $posts .= htmlspecialchars($p['body'])."
+                    <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
+                        <input type='submit' name='like' value='Like'>
+                    </form><br/> <hr/>";
     }
+
 } else {
     die('User not found!');
 }
