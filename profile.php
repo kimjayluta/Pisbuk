@@ -8,6 +8,13 @@ $isFollowing = false;
 $userid = "";
 $followerid = "";
 
+if (login::isLoggedIn()){
+    echo "Logged in! account id:".login::isLoggedIn();
+} else {
+    echo "Not logged in!";
+    exit;
+}
+
 if (isset($_GET['username'])) {
     //checking if the username(username ng ifafollow) is in the database
     if (DB::query('SELECT username FROM users WHERE username=:username', array(':username' => $_GET['username']))) {
