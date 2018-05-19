@@ -1,6 +1,7 @@
 <?php
 include('./classes/db.php');
 include('./classes/log_in.php');
+include('./classes/post.php');
 
 $username = "";
 $verified = false;
@@ -11,14 +12,13 @@ $followerid = "";
 if (login::isLoggedIn()){
     echo "Logged in! account id:".login::isLoggedIn();
 } else {
-    echo "Not logged in!";
-    exit;
+    die ("Not logged in!");
 }
 
 if (isset($_GET['username'])) {
     //checking if the username(username ng ifafollow) is in the database
     if (DB::query('SELECT username FROM users WHERE username=:username', array(':username' => $_GET['username']))) {
-        //Username ng nsa get method
+        //Username ng nsa tig vivisit na profile account
         $username = DB::query('SELECT username FROM users WHERE username=:username', array(':username' => $_GET['username']))[0]['username'];
         //kinukua ang valye kang verified 0 means not verified and 1 means verified account
         $verified = DB::query('SELECT verified FROM users WHERE  username=:username', array(':username' => $_GET['username']))[0]['verified'];
@@ -65,54 +65,14 @@ if (isset($_GET['username'])) {
 
     //Post function
     if (isset($_POST['post'])) {
-        $postbody = $_POST['postbody'];
-        $loggedInUserId = login::isLoggedIn();
-        //checking the length of the post
-        if (strlen($postbody) < 1 || strlen($postbody) > 160) {
-            die('Your post is too long');
-        }
-        //Pwedi ka lang mag post sa sadiri mong account
-        if ($userid == $loggedInUserId){
-            DB::query('INSERT INTO posts VALUES(\'\',:postbody, now(), :userid,0)', array(':postbody' => $postbody, ':userid' => $userid));
-        } else {
-            die('Incorrect user');
-        }
-
+      post::createPost($_POST['postbody'], login::isLoggedIn(), $userid);
     }
     //Like function
     if (isset($_GET['postid'])){
-        //checking if the logged in user already liked the post
-        if (!DB::query('SELECT user_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'],':userid'=>$followerid))){
-            //like will insert in the database
-            DB::query('UPDATE posts SET likes=likes+1 WHERE id=:postid', array(':postid'=>$_GET['postid']));
-            //insert the user who liked the post
-            DB::query('INSERT INTO post_likes VALUES(\'\',:postid,:userid)',array(':postid'=>$_GET['postid'],':userid'=>$followerid));
-        } else {
-            DB::query('UPDATE posts SET likes=likes-1 WHERE id=:postid', array(':postid'=>$_GET['postid']));
-            DB::query('DELETE FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'],'userid'=>$followerid));
-        }
-
+        post::likePost($_GET['postid'], $followerid);
     }
-    //querying the posts
-    $dbposts = DB::query('SELECT * FROM posts WHERE user_id=:userid ORDER BY id DESC', array(':userid' => $userid));
-    $posts = "";
-    //to print the post
-    foreach ($dbposts as $p) {
-        //
-        if (!DB::query('SELECT post_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$p['id'],':userid'=>$followerid))){
-            $posts .= htmlspecialchars($p['body'])."
-                    <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
-                        <input type='submit' name='like' value='Like'>
-                        <span>".$p['likes']."likes</span>
-                    </form><br/> <hr/>";
-        } else {
-            $posts .= htmlspecialchars($p['body'])."
-                    <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
-                        <input type='submit' name='unlike' value='Unlike'>
-                        <span>".$p['likes']." likes</span>
-                    </form><br/> <hr/>";
-        }
-    }
+    //Display the posts function
+    $posts = post::postDisplay($userid, $username, $followerid);
 
 } else {
     die('User not found!');
