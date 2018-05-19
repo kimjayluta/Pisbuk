@@ -41,6 +41,19 @@
         }
     }
 
+    public static function link_add($text){
+        $text = explode(" ", $text);
+        $newstring = "";
+        foreach ($text as $word) {
+            if (substr($word, 0, 1) == "@") {
+                $newstring .= "<a href='profile.php?username=".substr($word, 1)."'>".htmlspecialchars($word)."</a> ";
+            } else {
+                $newstring .= htmlspecialchars($word)." ";
+            }
+        }
+        return $newstring;
+    }
+
     public static function postDisplay($userid, $username, $loggedInUserId){
         //querying the posts
         $dbposts = DB::query('SELECT * FROM posts WHERE user_id=:userid ORDER BY id DESC', array(':userid' => $userid));
@@ -49,17 +62,17 @@
         foreach ($dbposts as $p) {
             //
             if (!DB::query('SELECT post_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$p['id'],':userid'=>$loggedInUserId))){
-                $posts .= "<img src='".$p['postimg']."'><br />".htmlspecialchars($p['body'])."
-                    <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
-                        <input type='submit' name='like' value='Like'>
-                        <span>".$p['likes']."likes</span>
-                    </form><br/> <hr/>";
+                $posts .= "<img src='".$p['postimg']."'><br />".self::link_add($p['body'])."
+                        <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
+                            <input type='submit' name='like' value='Like'>
+                            <span>".$p['likes']."likes</span>
+                        </form><br/> <hr/>";
             } else {
-                $posts .= "<img src='".$p['postimg']."'>".htmlspecialchars($p['body'])."
-                    <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
-                        <input type='submit' name='unlike' value='Unlike'>
-                        <span>".$p['likes']." likes</span>
-                    </form><br/> <hr/>";
+                $posts .= "<img src='".$p['postimg']."'>".self::link_add($p['body'])."
+                        <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
+                            <input type='submit' name='unlike' value='Unlike'>
+                            <span>".$p['likes']." likes</span>
+                        </form><br/> <hr/>";
             }
         }
         return $posts;
