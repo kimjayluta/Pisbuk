@@ -76,7 +76,7 @@ if (isset($_GET['username'])) {
     if (isset($_GET['postid'])){
         post::likePost($_GET['postid'], $followerid);
     }
-    //Display the posts function
+    //Display function
     $posts = post::postDisplay($userid, $username, $followerid);
 
 } else {
