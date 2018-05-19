@@ -2,6 +2,7 @@
 include('./classes/db.php');
 include('./classes/log_in.php');
 include('./classes/post.php');
+include('./classes/image.php');
 
 $username = "";
 $verified = false;
@@ -62,10 +63,14 @@ if (isset($_GET['username'])) {
     if (DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid' => $followerid))) {
         $isFollowing = true;
     }
-
-    //Post function
+    //Post and Post image function
     if (isset($_POST['post'])) {
-      post::createPost($_POST['postbody'], login::isLoggedIn(), $userid);
+        if ($_FILES['postimg']['size'] == 0){
+            post::createPost($_POST['postbody'], login::isLoggedIn(), $userid);
+        } else {
+          $postid = post::createImage($_POST['postbody'], login::isLoggedIn(), $userid);
+          image::uploadImg('postimg','UPDATE posts SET postimg=:postimg WHERE id=:postid', array(':postid'=>$postid));
+        }
     }
     //Like function
     if (isset($_GET['postid'])){
@@ -90,8 +95,10 @@ if (isset($_GET['username'])) {
    }
    ?>
 </form>
-<form action="profile.php?username=<?php echo $username;?>" method="post">
-    <textarea name="postbody" cols="80" rows="8" required="required"></textarea><br/>
+<form action="profile.php?username=<?php echo $username;?>" method="post" enctype="multipart/form-data">
+    <textarea name="postbody" cols="80" rows="8"></textarea><br /><p />
+    Upload an image:
+    <input type="file" name="postimg">
     <input type="submit" name="post" value="Post">
 </form>
 

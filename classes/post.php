@@ -7,11 +7,26 @@
         }
         //Pwedi ka lang mag post sa sadiri mong account
         if ($profileuserid == $loggedInUserId){
-            DB::query('INSERT INTO posts VALUES(\'\',:postbody, now(), :userid,0)', array(':postbody'=>$postbody,':userid'=>$profileuserid));
+            DB::query('INSERT INTO posts VALUES(\'\',:postbody, now(), :userid,0, \'\')', array(':postbody'=>$postbody,':userid'=>$profileuserid));
         } else {
             die('Incorrect user');
         }
     }
+
+     public static function createImage($postbody, $loggedInUserId, $profileuserid){
+         //checking the length of the post
+         if (strlen($postbody) > 160) {
+             die('Your post is too long');
+         }
+         //Pwedi ka lang mag post sa sadiri mong account
+         if ($profileuserid == $loggedInUserId){
+             DB::query('INSERT INTO posts VALUES(\'\',:postbody, now(), :userid,0, \'\')', array(':postbody'=>$postbody,':userid'=>$profileuserid));
+             $postid = DB::query('SELECT id FROM posts WHERE user_id=:userid ORDER BY id DESC LIMIT 1 ',array(':userid'=>$loggedInUserId))[0]['id'];
+             return $postid;
+         } else {
+             die('Incorrect user');
+         }
+     }
 
     public static function likePost($postId, $likerId){
         //checking if the logged in user already liked the post
@@ -34,13 +49,13 @@
         foreach ($dbposts as $p) {
             //
             if (!DB::query('SELECT post_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$p['id'],':userid'=>$loggedInUserId))){
-                $posts .= htmlspecialchars($p['body'])."
+                $posts .= "<img src='".$p['postimg']."'><br />".htmlspecialchars($p['body'])."
                     <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
                         <input type='submit' name='like' value='Like'>
                         <span>".$p['likes']."likes</span>
                     </form><br/> <hr/>";
             } else {
-                $posts .= htmlspecialchars($p['body'])."
+                $posts .= "<img src='".$p['postimg']."'>".htmlspecialchars($p['body'])."
                     <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>
                         <input type='submit' name='unlike' value='Unlike'>
                         <span>".$p['likes']." likes</span>
