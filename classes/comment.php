@@ -10,4 +10,10 @@ class comment {
             DB::query('INSERT INTO comments VALUES (\'\', :comment, :userid, NOW(), :postid)', array(':comment'=>$commentBody, ':userid'=>$userId, ':postid'=>$postId));
         }
     }
+    public static function displayComment($postId){
+        $comments = DB::query('SELECT comments.comment, users.username FROM comments, users WHERE post_id=:postid AND comments.user_id=users.id',array(':postid'=>$postId));
+        foreach ($comments as $cm){
+            echo $cm['comment']." @".$cm['username']."<br />";
+        }
+    }
 }

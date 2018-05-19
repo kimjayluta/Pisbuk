@@ -10,6 +10,7 @@ $userid = "";
 if (login::isLoggedIn()){
     $userid = login::isLoggedIn();
     $showTimeline = true;
+
 } else {
     die ("Not logged in!");
 }
@@ -21,7 +22,6 @@ if (isset($_GET['postid'])) {
 //comment function
 if (isset($_POST['comment'])) {
     comment::createComment($_POST['commentbody'], $_GET['postid'], $userid);
-    echo $_POST['commentbody'], $_GET['postid'], $userid;
 }
 //To print the posts from database
 $followingposts =DB::query('SELECT posts.body, posts.likes, posts.id, users.`username` FROM users,posts,followers  
@@ -40,5 +40,8 @@ foreach($followingposts as $post) {
          <form action='index.php?postid=".$post['id']."' method='post'>
          <textarea name='commentbody' cols='50' rows='3'></textarea><br /><p />
          <input type='submit' name='comment' value='Post comment'>
-         </form><hr /></br />";
+         </form>";
+        comment::displayComment($post['id']);
+        echo "
+        <hr /></br />";
 }
