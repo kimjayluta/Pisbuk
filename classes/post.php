@@ -9,8 +9,9 @@
         $topics  = self::getTopics($postbody);
         //Pwedi ka lang mag post sa sadiri mong account
         if ($profileuserid == $loggedInUserId){
-            if (count(self::notify($postbody)) != 0){
-                foreach (self::notify($postbody) as $key => $n){
+            //For notification function
+            if (count(notify::notif($postbody)) != 0){
+                foreach (notify::notif($postbody) as $key => $n){
                     $s = $loggedInUserId;
                     $r = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$key))[0]['id'];
                     if ($r != 0){
@@ -33,8 +34,8 @@
          $topics  = self::getTopics($postbody);
          //Pwedi ka lang mag post sa sadiri mong account
          if ($profileuserid == $loggedInUserId){
-             if (count(self::notify($postbody)) != 0){
-                 foreach (self::notify($postbody) as $key => $n){
+             if (count(notify::notif($postbody)) != 0){
+                 foreach (notify::notif($postbody) as $key => $n){
                      $s = $loggedInUserId;
                      $r = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$key))[0]['id'];
                      if ($r != 0){
@@ -55,6 +56,7 @@
             DB::query('UPDATE posts SET likes=likes+1 WHERE id=:postid', array(':postid'=>$postId));
             //insert the user who liked the post
             DB::query('INSERT INTO post_likes VALUES(\'\',:postid,:userid)',array(':postid'=>$postId,':userid'=>$likerId));
+            notify::notif("",$postId);
         } else {
             DB::query('UPDATE posts SET likes=likes-1 WHERE id=:postid', array(':postid'=>$_GET['postid']));
             DB::query('DELETE FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId,'userid'=>$likerId));
@@ -87,17 +89,6 @@
             }
         }
         return $newstring;
-    }
-
-    public static function notify($text){
-        $text = explode(" ",$text);
-        $notify = array();
-        foreach ($text as $word) {
-            if (substr($word, 0, 1) == "@") {
-                $notify[substr($word, 1)] = array("type"=>1,"extra"=>' { "postbody":"'.htmlentities(implode($text," ")).'"}');
-            }
-        }
-        return $notify;
     }
 
     //display function

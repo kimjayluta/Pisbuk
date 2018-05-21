@@ -3,6 +3,7 @@ include('./classes/db.php');
 include('./classes/log_in.php');
 include('./classes/post.php');
 include('./classes/image.php');
+include('./classes/notify.php');
 
 $username = "";
 $verified = false;
