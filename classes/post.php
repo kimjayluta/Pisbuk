@@ -9,6 +9,15 @@
         $topics  = self::getTopics($postbody);
         //Pwedi ka lang mag post sa sadiri mong account
         if ($profileuserid == $loggedInUserId){
+            if (count(self::notify($postbody)) != 0){
+                foreach (self::notify($postbody) as $key => $n){
+                    $s = $loggedInUserId;
+                    $r = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$key))[0]['id'];
+                    if ($r != 0){
+                        DB::query('INSERT INTO notifications VALUES (\'\', :type, :receiver, :sender, :extra)', array(':type'=>$n['type'],':receiver'=>$r,':sender'=>$s, ':extra'=>$n['extra']));
+                    }
+                }
+            }
             DB::query('INSERT INTO posts VALUES(\'\', :postbody, now(), :userid,0, \'\', :topics)', array(':postbody'=>$postbody,':userid'=>$profileuserid,':topics'=>$topics));
         } else {
             die('Incorrect user');
@@ -24,9 +33,15 @@
          $topics  = self::getTopics($postbody);
          //Pwedi ka lang mag post sa sadiri mong account
          if ($profileuserid == $loggedInUserId){
-             DB::query('INSERT INTO posts VALUES(\'\',:postbody, now(), :userid,0, \'\', :topics)', array(':postbody'=>$postbody,':userid'=>$profileuserid,':topics'=>$topics));
-             $postid = DB::query('SELECT id FROM posts WHERE user_id=:userid ORDER BY id DESC LIMIT 1 ',array(':userid'=>$loggedInUserId))[0]['id'];
-             return $postid;
+             if (count(self::notify($postbody)) != 0){
+                 foreach (self::notify($postbody) as $key => $n){
+                     $s = $loggedInUserId;
+                     $r = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$key))[0]['id'];
+                     if ($r != 0){
+                         DB::query('INSERT INTO notifications VALUES (\'\', :type, :receiver, :sender, :extra)', array(':type'=>$n['type'],':receiver'=>$r,':sender'=>$s, ':extra'=>$n['extra']));
+                     }
+                 }
+             }
          } else {
              die('Incorrect user');
          }
@@ -72,6 +87,17 @@
             }
         }
         return $newstring;
+    }
+
+    public static function notify($text){
+        $text = explode(" ",$text);
+        $notify = array();
+        foreach ($text as $word) {
+            if (substr($word, 0, 1) == "@") {
+                $notify[substr($word, 1)] = array("type"=>1,"extra"=>' { "postbody":"'.htmlentities(implode($text," ")).'"}');
+            }
+        }
+        return $notify;
     }
 
     //display function
