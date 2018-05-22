@@ -5,9 +5,10 @@ include('./classes/post.php');
 include('./classes/comment.php');
 
 $showTimeline = false;
-$userid = "";
+
 
 if (login::isLoggedIn()){
+
     $userid = login::isLoggedIn();
     $showTimeline = true;
 
@@ -24,9 +25,10 @@ if (isset($_POST['comment'])) {
     comment::createComment($_POST['commentbody'], $_GET['postid'], $userid);
 }
 //To print the posts from database
+//ang ma print na post dgd kung kisay ang finafollow lang kang nka login na user
 $followingposts =DB::query('SELECT posts.body, posts.likes, posts.id, users.`username` FROM users,posts,followers  
-                                WHERE posts.user_id = followers.user_id 
-                                AND users.id = posts.user_id 
+                                WHERE posts.user_id = followers.user_id   
+                                AND users.id = posts.user_id  
                                 AND follower_id =:userid ORDER BY posts.likes DESC ;', array(':userid'=>$userid));
 foreach($followingposts as $post) {
     echo $post['body']." ~ ".$post['username'];
@@ -34,7 +36,7 @@ foreach($followingposts as $post) {
     if (!DB::query('SELECT post_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$post['id'], ':userid'=>$userid))) {
         echo "<input type='submit' name='like' value='Like'>";
     } else {
-        echo "<input type='submit' name='unlike' value='Unlike'>";
+        echo "<input type='submit' name='unlike' value='Unlike'>"   ;
     }
     echo"<span>".$post['likes']." likes</span>    </form>
          <form action='index.php?postid=".$post['id']."' method='post'>

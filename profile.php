@@ -3,6 +3,7 @@ include('./classes/db.php');
 include('./classes/log_in.php');
 include('./classes/post.php');
 include('./classes/image.php');
+include('./classes/notify.php');
 
 $username = "";
 $verified = false;
@@ -58,11 +59,24 @@ if (isset($_GET['username'])) {
             $isFollowing = false;
         }
     }
-
     //kapg finafollow na kang user
     if (DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid' => $followerid))) {
         $isFollowing = true;
     }
+
+    //delete post function
+    if (isset($_POST['deletePost'])){
+        if (DB::query('SELECT id FROM posts WHERE id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'], ':userid'=>$followerid))){
+            //Delete the post
+            DB::query('DELETE FROM posts WHERE id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'], ':userid'=>$followerid));
+            //Delete the like in the post
+            DB::query('DELETE FROM post_likes WHERE post_id=:postid', array(':postid'=>$_GET['postid']));
+            //Delete comment
+            DB::query('DELETE FROM comments WHERE post_id=:postid', array(':postid'=>$_GET['postid']));
+            echo 'Post deleted!';
+        }
+    }
+
     //Post and Post image function
     if (isset($_POST['post'])) {
         if ($_FILES['postimg']['size'] == 0){
@@ -72,10 +86,12 @@ if (isset($_GET['username'])) {
           image::uploadImg('postimg','UPDATE posts SET postimg=:postimg WHERE id=:postid', array(':postid'=>$postid));
         }
     }
+
     //Like function
-    if (isset($_GET['postid'])){
+    if (isset($_GET['postid']) && !isset($_POST['deletepost'])){
         post::likePost($_GET['postid'], $followerid);
     }
+
     //Display function
     $posts = post::postDisplay($userid, $username, $followerid);
 
