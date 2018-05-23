@@ -5,9 +5,7 @@ include('./classes/post.php');
 include('./classes/comment.php');
 
 $showTimeline = false;
-
 if (login::isLoggedIn()){
-
     $userid = login::isLoggedIn();
     $showTimeline = true;
 } else {
