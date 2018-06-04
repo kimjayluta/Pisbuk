@@ -1,5 +1,7 @@
 <?php
 include('classes/db.php');
+include('classes/Mail.php');
+
 if (isset($_POST['createaccount'])){
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -18,6 +20,7 @@ if (isset($_POST['createaccount'])){
                         if (!DB::query('SELECT email FROM users WHERE email=:email', array(':email'=>$email))){
                             //Inserting the user inputs data into the database
                             DB::query('INSERT INTO users VALUES (\'\',:username,:password,:email,\'0\',\'\')', array(':username'=>$username, ':password'=>password_hash($password,PASSWORD_BCRYPT), ':email'=>$email));
+                            Mail::sendEmail('Welcome to my social network!', 'Your account has been created', $email);
                             echo "Success!";
                         } else {
                             echo "Email is already in use!";
@@ -28,7 +31,7 @@ if (isset($_POST['createaccount'])){
                 } else {
                     echo "Your password is invalid!";
                 }
-            } else    {
+            } else {
                 echo "Invalid characters!";
             }
         } else {

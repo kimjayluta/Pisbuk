@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialNetwork</title>
+    <link rel="stylesheet" type="text/css" href="vendor/twbs/bootstrap/dist/css/bootstrap.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-light justify-content-between" style="background: #0b2469eb;">
+        <form class="form-inline" style=" margin-left: 729px;">
+            <input class="form-control mr-sm-2" id="username" placeholder="Username" aria-label="username">
+            <input class="form-control mr-sm-2" id="password" placeholder="Password" aria-label="password">
+            <button class="btn btn-primary" type="button" id="login"><strong>Login</strong></button>
+        </form>
+    </nav>
+    <div class="container mt-5" style="width:500px;">
+        <form>
+        <h1>SIGN UP HERE!</h1>
+        <div class="form-group">
+            <label for="exampleInputEmail1">Username</label>
+            <input type="text" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">Password</label>
+            <input type="password" class="form-control">
+        </div>
+         <div class="form-group">
+            <label for="exampleInputPassword1">Confirm Password</label>
+            <input type="password" class="form-control" >
+        </div>
+        <div class="form-group">
+            <label for="exampleInputEmail1">Email</label>
+            <input type="email" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary" style=" float: right;"><strong>Submit</strong></button>
+        </form>
+    </div>
+    <footer style="background: #06091314; margin-top:160px; height: 50px;">Develop by Kim jay Luta</footer>
+     <script type="text/javascript">
+        $('#login').click(function() {
+
+                $.ajax({
+
+                        type: "POST",
+                        url: "api/auth",
+                        processData: false,
+                        contentType: "application/json",
+                        data: '{ "username": "'+ $("#username").val() +'", "password": "'+ $("#password").val() +'" }',
+                        success: function(r) {
+                                console.log(r)
+                        },
+                        error: function(r) {
+                                setTimeout(function() {
+                                $('[data-bs-hover-animate]').removeClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'));
+                                }, 2000)
+                                $('[data-bs-hover-animate]').addClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'))
+                                console.log(r)
+                        }
+
+                });
+
+        });
+    <script src="vendor/jquery/jquery.min.js"></script>
+</body>
+</html>

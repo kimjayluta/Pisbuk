@@ -4,7 +4,6 @@ include('./classes/log_in.php');
 
 if (login::isLoggedIn()){
     $userid = login::isLoggedIn();
-
 } else {
     die ("Not logged in!");
 }
@@ -20,7 +19,8 @@ if (isset($_GET['mid'])){
     } else {
         $id = $message['sender'];
     }
-    DB::query('UPDATE messages SET `read`=1 WHERE id=:mid AND receiver=:receiver OR sender=:sender', array(':mid'=>$_GET['mid'], ':receiver'=>$userid, ':sender'=>$userid))
+    DB::query('UPDATE messages SET `read`=1 WHERE id=:mid AND (receiver=:receiver OR sender=:sender)'
+                      ,array(':mid'=>$_GET['mid'], ':receiver'=>$userid, ':sender'=>$userid));
     ?>
     <form action="send-message.php?receiver=<?php echo $id;?>" method="post">
         <textarea name="body" rows="8" cols="80"></textarea><br /><p />
@@ -32,13 +32,15 @@ if (isset($_GET['mid'])){
 <h1>My messages</h1>
 <?php
     //messages printing function
-    $messages = DB::query('SELECT messages.*, users.username FROM messages, users WHERE receiver=:receiver OR sender=:sender AND users.id = messages.sender', array(':receiver'=>$userid,':sender'=>$userid));
+    //$messages = DB::query('SELECT messages.*, users.username FROM messages,users WHERE (receiver=:receiver OR sender=:sender) AND (users.id = messages.sender OR users.id = messages.receiver)', array(':receiver'=>$userid, ':sender'=>$userid));
+    $messages = DB::query('SELECT messages.*, users.username FROM messages,users WHERE receiver=:receiver AND users.id = messages.sender', array(':receiver'=>$userid));
     foreach ($messages as $message) {
         if (strlen($message['body']) > 10) {
             $m = substr($message['body'], 0, 10) . " ...";
         } else {
             $m = $message['body'];
         }
+
         if ($message['read']) {
             echo "<a href='my-messages.php?mid=".$message['id']."'><strong>".$m."</strong></a> sent by ".$message['username']."<hr />";
         } else {
