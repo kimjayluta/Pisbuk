@@ -1,68 +1,88 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SocialNetwork</title>
     <link rel="stylesheet" type="text/css" href="vendor/twbs/bootstrap/dist/css/bootstrap.css">
 </head>
-
-<body>
-    <nav class="navbar navbar-light justify-content-between" style="background: #0b2469eb;">
-        <form class="form-inline" style=" margin-left: 729px;">
-            <input class="form-control mr-sm-2" id="username" placeholder="Username" aria-label="username">
-            <input class="form-control mr-sm-2" id="password" placeholder="Password" aria-label="password">
-            <button class="btn btn-primary" type="button" id="login"><strong>Login</strong></button>
+<body style="">
+    <nav class="navbar navbar-light justify-content-between" style="background: #5f5a5d;">
+        <form class="form-inline">
+            <a href="#" class="navbar-brand" style="color:white;"><strong>Pisbuk</strong></a>
+            <div class="ml-auto">
+                <input class="form-control mr-sm-2" id="username" placeholder="Username" aria-label="username" type="text">
+                <input class="form-control mr-sm-2" id="password" placeholder="Password" aria-label="password" type="password">
+                <button class="btn btn-primary" type="button" id="login" data-bs-hover-animate="shake"><strong>Login</strong></button>
+            </div>
         </form>
     </nav>
-    <div class="container mt-5" style="width:500px;">
-        <form>
-        <h1>SIGN UP HERE!</h1>
-        <div class="form-group">
-            <label for="exampleInputEmail1">Username</label>
-            <input type="text" class="form-control">
+    <div  class="container" style="width: 100%; height: 468px;background: url('pisbukbg.jpg') no-repeat 100%;">
+        <div class="container mt-4" style="width:500px;">
+            <form class="card p-4" style="background: #ded6c991;">
+                <h1 style="text-align: center;">SIGN UP HERE!</h1>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" class="form-control" id="usn">
+                </div>
+                <div class="form-group">
+                    <label >Password</label>
+                    <input type="password" class="form-control" id="pwd">
+                </div>
+                <div class="form-group">
+                    <label >Email</label>
+                    <input type="email" class="form-control" id="email">
+                </div>
+                <div>
+                    <button type="button" class="btn btn-block btn-outline-primary" id="createAccount" data-bs-hover-animate="shake" style=" float: right;" ><strong>Create Account</strong></button>
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="exampleInputPassword1">Password</label>
-            <input type="password" class="form-control">
-        </div>
-         <div class="form-group">
-            <label for="exampleInputPassword1">Confirm Password</label>
-            <input type="password" class="form-control" >
-        </div>
-        <div class="form-group">
-            <label for="exampleInputEmail1">Email</label>
-            <input type="email" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-primary" style=" float: right;"><strong>Submit</strong></button>
-        </form>
     </div>
-    <footer style="background: #06091314; margin-top:160px; height: 50px;">Develop by Kim jay Luta</footer>
-     <script type="text/javascript">
+    <script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript">
+        //Login
         $('#login').click(function() {
-
-                $.ajax({
-
-                        type: "POST",
-                        url: "api/auth",
-                        processData: false,
-                        contentType: "application/json",
-                        data: '{ "username": "'+ $("#username").val() +'", "password": "'+ $("#password").val() +'" }',
-                        success: function(r) {
-                                console.log(r)
-                        },
-                        error: function(r) {
-                                setTimeout(function() {
-                                $('[data-bs-hover-animate]').removeClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'));
-                                }, 2000)
-                                $('[data-bs-hover-animate]').addClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'))
-                                console.log(r)
-                        }
-
-                });
-
+            $.ajax({
+                type: "POST",
+                url: "api/auth",
+                processData: false,
+                contentType: "application/json",
+                data: '{ "username": "'+ $("#username").val() +'", "password": "'+ $("#password").val() +'" }',
+                success: function(r) {
+                    console.log(r)
+                },
+                error: function(r) {
+                    setTimeout(function() {
+                        $('[data-bs-hover-animate]').removeClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'));
+                    }, 2000)
+                    $('[data-bs-hover-animate]').addClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'))
+                    console.log(r)
+                }
+            });
         });
-    <script src="vendor/jquery/jquery.min.js"></script>
+        //Signup
+        $('#createAccount').click(function () {
+           $.ajax({
+               type: "POST",
+               url: "api/users",
+               processData: false,
+               contentType: "application/json",
+               //getting the data's from input fields
+               data: '{ "username": "'+ $("#usn").val() +'", "password": "'+ $("#pwd").val() +'", "email": "'+ $("#email").val() +'" }',
+               success: function (r) {
+                   console.log(r)
+               },
+               error: function (r) {
+                   setTimeout(function() {
+                       $('[data-bs-hover-animate]').removeClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'));
+                       }, 2000)
+                       $('[data-bs-hover-animate]').addClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'))
+                       console.log(r)
+               }
+           });
+        });
+    </script>
+
 </body>
 </html>

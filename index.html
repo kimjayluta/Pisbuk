@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Pisbuk by Kim</title>
+    <link rel="stylesheet" type="text/css" href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/twbs/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/fonts/ionicons.min.css">
+</head>
+<body>
+<nav class="navbar navbar-light justify-content-between" style="background: #5f5a5d;">
+    <form class="form-inline">
+        <a href="#" class="navbar-brand" style="color:white;"><strong>Pisbuk</strong></a>
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" style="color:white;">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" style="color:white;">Message</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" style="color:white;">Notification</a>
+            </li>
+            <li class="nav-item dropdown" >
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" style="color:white;">User</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Profile</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">##</a>
+                    <a class="dropdown-item" href="#">##</a>
+                    <a class="dropdown-item" href="#">Logout</a>
+                </div>
+            </li>
+        </ul>
+        <div class="ml-auto">
+            <input class="form-control mr-sm-2" placeholder="Search" aria-label="username" type="text">
+            <button class="btn btn-primary" type="button" id="login" data-bs-hover-animate="shake"><strong>Search</strong></button>
+        </div>
+    </form>
+</nav>
+<div class="container" >
+    <h1>Timeline </h1>
+    <div class="timelineposts">
+
+    </div>
+</div>
+<nav class="navbar fixed-bottom" style="background-color:#ebebec;">
+    <div class="container">
+        <p class="copyright mt-2" style="text-align: center;">Social Network© 2018</p>
+    </div>
+</nav>
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="assets/js/bs-animation.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $.ajax({
+
+            type: "GET",
+            url: "api/posts",
+            processData: false,
+            contentType: "application/json",
+            data: '',
+            success: function(r) {
+                var posts = JSON.parse(r)
+                $.each(posts, function(index) {
+                    $('.timelineposts').html(
+                        $('.timelineposts').html() + '<blockquote><p>'+posts[index].PostBody+'</p><footer>Posted by '+posts[index].PostedBy+' on '+posts[index].PostDate+'<button class="btn btn-default" data-id="'+posts[index].PostId+'" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;"> <i class="glyphicon glyphicon-heart" data-aos="flip-right"></i><span> '+posts[index].Likes+' Likes</span></button><button class="btn btn-default comment" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;"><i class="glyphicon glyphicon-flash" style="color:#f9d616;"></i><span style="color:#f9d616;"> Comments</span></button></footer></blockquote>'
+                    )
+
+                    $('[data-id]').click(function() {
+                        var buttonid = $(this).attr('data-id');
+                        $.ajax({
+
+                            type: "POST",
+                            url: "api/likes?id=" + $(this).attr('data-id'),
+                            processData: false,
+                            contentType: "application/json",
+                            data: '',
+                            success: function(r) {
+                                var res = JSON.parse(r)
+                                $("[data-id='"+buttonid+"']").html(' <i class="glyphicon glyphicon-heart" data-aos="flip-right"></i><span> '+res.Likes+' Likes</span>')
+                            },
+                            error: function(r) {
+                                console.log(r)
+                            }
+
+                        });
+                    })
+                })
+
+            },
+            error: function(r) {
+                console.log(r)
+            }
+
+        });
+    });
+</script>
+</body>
+</html>
