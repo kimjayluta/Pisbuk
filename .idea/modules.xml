@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Pisbuk.iml" filepath="$PROJECT_DIR$/.idea/Pisbuk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../.idea/htdocs.iml" filepath="$PROJECT_DIR$/../.idea/htdocs.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../part36/.idea/part36.iml" filepath="$PROJECT_DIR$/../part36/.idea/part36.iml" />
+      <module fileurl="file://E:/xampp/htdocs/.idea/htdocs.iml" filepath="E:/xampp/htdocs/.idea/htdocs.iml" />
+      <module fileurl="file://C:\xampp\htdocs\part36\.idea\part36.iml" filepath="C:\xampp\htdocs\part36\.idea\part36.iml" />
     </modules>
   </component>
 </project>
