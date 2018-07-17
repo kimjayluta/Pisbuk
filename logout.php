@@ -8,9 +8,11 @@ if (!login::isLoggedIn()){
 
 if (isset($_POST['confirm'])){
     if (isset($_POST['alldevices'])){
+        //eerase nya su gabos na token sa user na nakalogin
         DB::query('DELETE FROM login_tokens WHERE user_id=:userid',array(':userid'=>login::isLoggedIn()));
     }else {
         if (isset($_COOKIE['SNID'])){
+            //eerase nya lang su token na ginamit kang pag login
             DB::query('DELETE FROM login_tokens WHERE token=:token',array(':token'=>sha1($_COOKIE['SNID'])));
         }
         setcookie('SNID', 1,time()-3600);

@@ -7,35 +7,57 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 
         if ($_GET['url'] == "auth") {
 
-        } else if ($_GET['url'] == "users") {
+        }
 
-        } else if ($_GET['url'] == "posts") {
+        else if ($_GET['url'] == "users") {
+
+        }
+        //Search
+        else if ($_GET['url'] == "search") {
+
+            $tosearch = explode(" ", $_GET['query']);
+            if (count($tosearch) == 1) {
+                $tosearch = str_split($tosearch[0], 2);
+            }
+
+            $whereclause = "";
+            $paramsarray = array(':body'=>'%'. $_GET['query'].'%');
+            for ($i = 0; $i < count($tosearch); $i++) {
+                if ( $i % 2){
+                    $whereclause .= " OR body LIKE :p$i ";
+                    $paramsarray[":p$i"] = $tosearch[$i];
+                }
+            }
+            $posts = $db->query('SELECT posts.id, posts.body,users.username,posts.posted_at FROM posts,users WHERE users.id = posts.user_id AND posts.body LIKE :body '.$whereclause.'LIMIT 10', $paramsarray);
+            echo json_encode($posts);
+        }
+        //Comment
+        else if ($_GET['url'] == "comments" && isset($_GET['postid'])) {
+            $output = "";
+            $comments = $db->query('SELECT comments.comment, users.username FROM comments, users WHERE post_id=:postid AND comments.user_id=users.id',array(':postid'=>$_GET['postid']));
+            $output .= "[";
+            foreach ($comments as $cm){
+                $output .= "{";
+                    $output .= '"Comment": "'.$cm['comment'].'",';
+                    $output .= '"CommentedBy": "'.$cm['username'].'"';
+                $output .= "},";
+                //echo $cm['comment']." @".$cm['username']."<br />";
+            }
+            $output = substr($output, 0,strlen($output)-1);
+            $output .= "]";
+            echo $output;
+        }
+        //Printing post
+        else if ($_GET['url'] == "posts") {
         //Posting posts
             $token = $_COOKIE['SNID'];
             $userid = $db->query('SELECT user_id FROM login_tokens WHERE token=:token', array(':token'=>sha1($token)))[0]['user_id'];
 
             //To print the posts from database ,ang ma print na post dgd kung kisay ang finafollow lang kang nka login na user
             $followingposts = $db->query('SELECT posts.body, posts.posted_at, posts.likes, posts.id, users.`username` FROM users,posts,followers  
-                                WHERE posts.user_id = followers.user_id   
+                                WHERE posts.user_id = followers.user_id 
                                 AND users.id = posts.user_id  
-                                AND follower_id =:userid ORDER BY posts.likes DESC ;', array(':userid'=>$userid));
-//
-//            $response = "[";
-//            foreach($followingposts as $post) {
-//
-//                $response .= "{";
-//                    $response .= '"PostId": '.$post['id'].',';
-//                    $response .= '"PostBody": "'.$post['body'].'",';
-//                    $response .= '"PostedBy": "'.$post['username'].'",';
-//                    $response .= '"PostDate": "'.$post['posted_at'].'",';
-//                    $response .= '"Likes": '.$post['likes'].'';
-//                $response .= "},";
-//
-//
-//            }
-//            $response = substr($response, 0, strlen($response)-1);
-//            $response .= "]";
-
+                                AND follower_id =:userid ORDER BY posts.likes DESC ;',array(':userid'=>$userid));
             $response = array();
             foreach($followingposts as $post) {
                 $content = array();
@@ -51,6 +73,27 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             http_response_code(200);
             echo json_encode($response);
 
+        }
+
+        else if ($_GET['url'] == "profileposts") {
+            //Posting posts
+            $userid = $db->query('SELECT id FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['id'];
+            $followingposts = $db->query('SELECT posts.id, posts.body, posts.posted_at, posts.likes, users.`username` FROM users, posts
+                WHERE users.id = posts.user_id
+                AND users.id = :userid
+                ORDER BY posts.posted_at DESC;', array(':userid'=>$userid));
+            $response = array();
+            foreach($followingposts as $post) {
+                $content = array();
+                $content["PostId"] = $post['id'];
+                $content["PostBody"] = $post['body'];
+                $content["PostedBy"] = $post['username'];
+                $content["PostDate"] = $post['posted_at'];
+                $content["Likes"] = $post['likes'];
+                array_push($response, $content);
+            }
+            http_response_code(200);
+            echo json_encode($response);
         }
 
 } else if ($_SERVER['REQUEST_METHOD'] == "POST") {
@@ -137,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 $db->query('INSERT INTO post_likes VALUES(\'\',:postid,:userid)',array(':postid'=>$postId,':userid'=>$likerId));
                 //notify::notif("",$postId);
             } else {
-                $db->query('UPDATE posts SET likes=likes-1 WHERE id=:postid', array(':postid'=>$_GET['postid']));
+                $db->query('UPDATE posts SET likes=likes-1 WHERE id=:postid', array(':postid'=>$postId));
                 $db->query('DELETE FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId,'userid'=>$likerId));
             }
             echo "{";

@@ -56,7 +56,7 @@
             DB::query('UPDATE posts SET likes=likes+1 WHERE id=:postid', array(':postid'=>$postId));
             //insert the user who liked the post
             DB::query('INSERT INTO post_likes VALUES(\'\',:postid,:userid)',array(':postid'=>$postId,':userid'=>$likerId));
-            notify::notif("",$postId);
+            /*notify::notif("",$postId);*/
         } else {
             DB::query('UPDATE posts SET likes=likes-1 WHERE id=:postid', array(':postid'=>$_GET['postid']));
             DB::query('DELETE FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId,'userid'=>$likerId));
@@ -108,8 +108,7 @@
                         if ($userid == $loggedInUserId){
                             $posts .= "<input type='submit' name='deletePost' value='Delete' />";
                         }
-                        $posts .= "
-                        </form><br/> <hr/>";
+                        $posts .= "</form><br/> <hr/>";
             } else {
                 $posts .= "<img src='".$p['postimg']."'>".self::link_add($p['body'])."
                         <form action='profile.php?username=$username&postid=".$p['id']."' method='post'>

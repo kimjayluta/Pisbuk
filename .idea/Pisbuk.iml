@@ -6,5 +6,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="part36" />
     <orderEntry type="module" module-name="htdocs" />
+    <orderEntry type="module" module-name="htdocs" />
   </component>
 </module>
